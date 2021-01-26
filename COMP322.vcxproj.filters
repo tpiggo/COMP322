@@ -16,6 +16,9 @@
     <Filter Include="Source Files\assignment1">
       <UniqueIdentifier>{b947c92c-5e93-4192-b8de-a8e88468e5d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\assignment2">
+      <UniqueIdentifier>{da649f41-3caa-471f-b502-28d2a9e350e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
