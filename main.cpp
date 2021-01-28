@@ -197,6 +197,7 @@ int main()
 	fillMatrix(matrix);
 	fillMatrix(matrix2);
 	printMatrix(matrix);
+
 	multiplyMatrices(matrix, matrix2, matrix_result);
 	printMatrix(matrix_result);
 	return 0;
