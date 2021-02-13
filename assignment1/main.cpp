@@ -4,6 +4,13 @@
 #include <time.h>
 using namespace std;
 
+
+/**
+ * Name: Timothy Piggott
+ * ID: 260855765
+ * 
+ * */
+
 void checkPassword()
 {
 	string var;
@@ -18,7 +25,7 @@ void checkPassword()
 		return;
 	}
 	// Mapping of the elements in the password
-	map<char, int> charMap;
+	map<char, int> charMap = map<char, int>();
 	bool hasNum = false;
 	bool hasSpecial = false;
 	// Want to make an array of tuples???? IDK how
@@ -95,8 +102,11 @@ int a = 1;
 */
 void fillMatrix(int matrix[rows][cols]) 
 {
+	// add a simple static increment.
 	a++;
+	// seed the random num generator.
 	srand(time(NULL) + a);
+	// Create the matrix
 	for (int i = 0; i < rows; i++)
 	{
 		for (int j = 0; j < cols; j++)
@@ -143,8 +153,10 @@ void multiplyMatrices(int matrix_left[rows][cols],
 	}
 	if (j < cols)
 	{
+		// Checking if we have reached the end of the column, don't multiple
 		if (k < cols)
 		{
+			// Do the matrix multiplication for the [i,j]th cell. 
 			if (k == 0)
 			{
 				matrix_result[i][j] = matrix_left[i][k] * matrix_right[k][j];
@@ -154,6 +166,7 @@ void multiplyMatrices(int matrix_left[rows][cols],
 				matrix_result[i][j] += matrix_left[i][k] * matrix_right[k][j];
 			}
 			k++;
+			// recursive call
 			return multiplyMatrices(matrix_left, matrix_right, matrix_result);
 		}
 		else
@@ -182,12 +195,13 @@ void multiplyMatricesIterative(int matrix_left[rows][cols],
 	{
 		for (int j = 0; j < cols; j++)
 		{
-			int sum = 0;
+			// Set the [i,j]th cell to zero
+			matrix_result[i][j] = 0;
 			for (int k = 0; k < rows; k++)
 			{
-				sum += matrix_left[i][k] * matrix_right[k][j];
+				// Put the sum into the [i,j]th cell
+				matrix_result[i][j]  += matrix_left[i][k] * matrix_right[k][j];
 			}
-			matrix_result[i][j] = sum;
 		}
 	}
 }
