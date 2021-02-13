@@ -20,7 +20,7 @@ void checkPassword()
 	cin >> var;
 	if (var.length() < 8) 
 	{
-		cout << "Error! Password not long enough (min 8 characters)!" << endl;
+		cout << "Error! Password not long enough (min 8 characters)!\n\n" << endl;
 		// Return out of the function
 		return;
 	}
@@ -43,22 +43,22 @@ void checkPassword()
 		// more than 2, error!
 		if (charMap[var[i]] > 2)
 		{
-			cout << "Error! Repeated character " << var[i] << " too many times" << endl;
+			cout << "Error! Repeated character " << var[i] << " too many times!\n\n" << endl;
 			return;
 		}
 	}
 	if (!hasNum)
 	{
-		cout << "Error! Missing a number in the password!" << endl;
+		cout << "Error! Missing a number in the password!\n\n" << endl;
 		// Return out of the function
 		return;
 	}
 	else if (!hasSpecial)
 	{
-		cout << "Error! Missing a special character *, #, $ in the password!" << endl;
+		cout << "Error! Missing a special character *, #, $ in the password!\n\n" << endl;
 		return;
 	}
-	cout << "Password has been accepted!" << endl;
+	cout << "Password has been accepted!\n\n" << endl;
 }
 void convertPhonetic()
 {
@@ -74,13 +74,13 @@ void convertPhonetic()
 	string phoneticString;
 	for (size_t i = 0; i < var.length(); i++)
 	{
+		// Error checking characters 1 by 1
 		if (var[i] < 'A' || (var[i] < 'a' && var[i] > 'Z') || var[i] > 'z')
 		{
-			cout << "Error! Bad character. Ending!";
+			cout << "Error! Bad character. Ending!\n\n" << endl;
 			return;
 		}
-		int ascii;
-		ascii = (var[i] >= 'A' && var[i] < 'Z')? var[i] - 65: var[i] - 97;
+		int ascii = (var[i] >= 'A' && var[i] < 'Z')? var[i] - 65: var[i] - 97;
 		// append a space if not the first word
 		if (i != 0)
 		{
@@ -89,7 +89,7 @@ void convertPhonetic()
 		// append the phonetic replacement
 		phoneticString.append(phonetics[ascii]);
 	}
-	cout << phoneticString << "\n" << endl;
+	cout << phoneticString << "\n\n\n" << endl;
 }
 
 const int rows = 5;
@@ -136,7 +136,7 @@ void printMatrix(int matrix[rows][cols])
 		cout << endl;
 		cout << "------------------------------" << endl;
 	}
-	cout << "\n\n";
+	cout << "\n\n" << endl;
 }
 
 void multiplyMatrices(int matrix_left[rows][cols],
@@ -209,6 +209,7 @@ void multiplyMatricesIterative(int matrix_left[rows][cols],
 
 int main()
 {
+	// Standard testing functions given by prof.
 	checkPassword();
 	convertPhonetic();
 	int matrix[rows][cols];
