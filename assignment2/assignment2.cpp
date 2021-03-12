@@ -8,10 +8,11 @@ class Node
 {
     private:
         int data;
-        Node *next;
-        Node *previous;
+        Node *next = NULL;
+        Node *previous = NULL;
     public:
         Node();
+        Node(int data);
         Node(int data, Node *next, Node *previous);
         int getData();
         Node* getNext();
@@ -21,15 +22,18 @@ class Node
         void printNode();
 };
 
+
+Node::Node()
+{
+    // Do nothing
+}
 /**
  * Constructor 
  * 
  */ 
-Node::Node()
+Node::Node(int data)
 {
-    this->next = NULL;
-    this->previous = NULL;
-    this->data = 0;
+    this->data = data;
 }
 
 /**
@@ -69,7 +73,12 @@ Node *Node::getPrevious()
 
 void Node::printNode()
 {
-    cout << "Data: " << this->data << " hasNext: " << (this->next != NULL) << " hasPrevious: " << (this->previous != NULL) << endl;
+    if (this->previous == NULL)
+        cout << "Data: " << this->data << " prev: NULL next: " << this->next->data  << endl;
+    else if (this->next == NULL)
+        cout << "Data: " << this->data << " prev: " << this->previous->data << " next: NULL" << endl;
+    else
+        cout << "Data: " << this->data << " prev: " << this->previous->data << " next:" << this->next->data << endl;
 }
 
 class DLLStructure
@@ -79,10 +88,12 @@ class DLLStructure
         int size, maxVal = INT32_MIN, minVal = INT32_MAX;
         void setMin();
         void setMax();
-        void mergeSort();
+        void mergeSort(Node arr[], int l, int r);
+        void merge(Node arr[], int l, int m, int r);
     public:
         DLLStructure();
         DLLStructure(int array[], int size);
+        DLLStructure(const DLLStructure &dll);
         ~DLLStructure();
         void printDLL();
         void printReverse();
@@ -125,6 +136,67 @@ void DLLStructure::setMin()
 }
 
 
+void DLLStructure::mergeSort(Node arr[], int l, int r)
+{
+    if (l >= r)
+        return;
+    int m = (l+r)/2;
+    mergeSort(arr, l, m);
+    mergeSort(arr, m+1, r);
+    merge(arr, l, m , r);
+}
+void DLLStructure::merge(Node arr[], int l, int m, int r)
+{
+    int c1 = m - l + 1;
+    int c2 = r - m;
+
+    Node *leftArr = new Node[c1];
+    Node *rightArr = new Node[c2];
+    for (int i = 0; i < c1; i++)
+        leftArr[i] = arr[l + i];
+    for (int i = 0; i < c2; i++)
+        rightArr[i] = arr[m+1+i];
+    
+    int i = 0, j = 0, k = l;
+
+    while (i < c1 && j < c2)
+    {
+        if (leftArr[i].getData() < rightArr[j].getData())
+        {
+            arr[k] = leftArr[i];
+            i++;
+        } 
+        else
+        {
+            arr[k] = rightArr[j];
+            j++;
+        }
+        k++;
+    }
+
+
+    while (i < c1)
+    {
+        arr[k] = leftArr[i];
+        i++;
+        k++;
+    }
+
+    while (j < c2)
+    {
+        arr[k] = rightArr[j];
+        j++;
+        k++;
+    }
+
+    delete [] leftArr;
+    delete [] rightArr;
+}
+
+/**
+ * Public functions
+ * 
+ **/ 
 DLLStructure::DLLStructure()
 {
     this->size = 0;
@@ -156,8 +228,38 @@ DLLStructure::DLLStructure(int array[], int size)
     this->size = size;
 }
 
+/**
+ * Deep copy constructor
+ **/ 
+DLLStructure::DLLStructure(const DLLStructure &dll)
+{
+    this->size = dll.size;
+    if (dll.first == NULL || dll.last == NULL)
+    {
+        // copying an empty list
+        return;
+    }
+    Node *cur = dll.first->getNext();
+    this->first = new Node(dll.first->getData());
+    this->last = this->first;
+
+    while (cur != NULL)
+    {
+        Node *newNode = new Node(cur->getData(), NULL, this->last);
+        this->last->setNext(newNode);
+        this->last = newNode;
+        cur = cur->getNext();
+    }
+}
+
 DLLStructure::~DLLStructure()
 {
+    if (this->first == NULL)
+    {
+        // Nothing to do in this case
+        return;
+    }
+    // Destruct the list
     while (this->first->getNext() != NULL)
     {
         Node *temp = this->first; 
@@ -335,7 +437,49 @@ void DLLStructure::Delete(int value)
  **/ 
 void DLLStructure::Sort()
 {
+    // Nothing to do in this case
+    if (this->size <= 1)
+    {
+        return;
+    }
+    // create an array for easy manipulation.
+    Node *aNode = new Node[this->size];
+    Node *cur = this->first;
+    int i = 0;
+    while (cur != NULL)
+    {
+        aNode[i] = *cur;
+        i++;
+        cur = cur ->getNext();
+    }
+    
+    // The actual sorting algorithm
+    this->mergeSort(aNode, 0, this->size-1);
+    
+    for (int i = 0; i < this->size; i++)
+    {
+        
+        // Should use switch statement but unable to get the following expression to be evaluated as a constant:
+        // const int end = this->size-1; 
+        if (i == 0)
+        {
+            aNode[i].setNext(&(aNode[i+1]));
+            aNode[i].setPrevious(NULL);
+            this->first = &(aNode[i]);
+            continue;
+        }
+        
+        if (i+1 == this->size)
+        {
+            aNode[i].setNext(NULL);
+            aNode[i].setPrevious(&(aNode[i-1]));
+            this->last = &(aNode[i]);
+            continue;
+        }
 
+        aNode[i].setNext(&(aNode[i+1]));
+        aNode[i].setPrevious(&(aNode[i-1]));
+    }
 }
 
 /**
@@ -363,7 +507,7 @@ int DLLStructure::getTail()
     // return garbage if the list is empty
     if (this->last == NULL)
     {
-        return INT32_MAX;
+        return INT32_MIN;
     }
     return this->last->getData();
 }
@@ -396,114 +540,49 @@ int DLLStructure::getMin()
     return minVal;
 }
 
-void testList()
-{
-    int array[] = {1,5,2,6,4};
-    DLLStructure *list = new DLLStructure(array, 5);
-    list->printDLL();
-    cout << "Length: " <<list->getSize() << endl;
-    list->InsertAfter(7,9);
-    list->printDLL();
-    cout << "Length: " <<list->getSize() << endl;
-    list->Delete(9);
-    list->printDLL();
-    cout << "MAX: " << list->getMax() << endl;
-    cout << "MIN: " << list->getMin() << endl;
-    cout << "Length: " <<list->getSize() << endl;
-    delete list;
-}
-
-int properTest() {
-    // Q 1, 2, 3 should obviously be implemented successfully
-    // in order to run the following code
-    int array[5] = {11, 2, 7, 22, 4};
-    DLLStructure dll(array, 5); // note that 5 is the size of the array
-    dll.printDLL(); // the output should be: 11, 2, 7, 22, 4
-    // Q 4
-    dll.InsertAfter(7, 13); // To insert 13 after the first occurence of 7
-    dll.printDLL(); // the output should be: 11, 2, 7, 13, 22, 4
-    dll.InsertAfter(25, 7); // To insert 7 after the first occurence of 25
-    dll.printDLL(); // the output should be: 11, 2, 7, 13, 22, 4, 7
-    // Q 5
-    dll.InsertBefore(7, 26); // To insert 26 before the first occurence of 7
-    dll.printDLL(); // the output should be: 11, 2, 26, 7, 13, 22, 4, 7
-    dll.InsertBefore(19, 12); // To insert 12 before the first occurence of 19
-    dll.printDLL(); // the output should be: 12, 11, 2, 26, 7, 13, 22, 4, 7
-    // Q 6
-    dll.Delete(22);
-    dll.printDLL(); // the output should be: 12, 11, 2, 26, 7, 13, 4, 7
-    // Q 7
-    dll.Sort();
-    dll.printDLL(); // the output should be: 2, 4, 7, 7, 11, 12, 13, 26
-    // Q 8
-    if (dll.IsEmpty())
-        cout << "The list is empty" << endl;
-    // Q 9
-    cout << "Head element is: " << dll.getHead() << endl;
-    cout << "Tail element is: " << dll.getTail() << endl;
-    // Q 10
-    cout << "Number of elements in the list is: " << dll.getSize() << endl;
-    // Q 11
-    cout << "Max element is: " << dll.getMax() << endl;
-    cout << "Min element is: " << dll.getMin() << endl;
-
-    // Q 11 theory question
-    // print to the screen the written answer for the theory question
-    // Q 12 theory question
-    // print to the screen the written answer for the theory question
-    // Q 12
-    //DLLStructure dll2 (dll);
-    //dll2.printDLL(); // the output should be: 2, 4, 7, 7, 11, 12, 13, 26
-    return 0;
-}
-
-int tester() {
-    // Q 1, 2, 3 should obviously be implemented successfully
-    // in order to run the following code
-    int array[5] = {11, 2, 7, 22, 4};
-    DLLStructure dll(array, 5); // note that 5 is the size of the array
-    dll.printDLL(); // the output should be: 11, 2, 7, 22, 4
-    // Q 4
-    dll.InsertAfter(7, 13); // To insert 13 after the first occurence of 7
-    dll.printDLL(); // the output should be: 11, 2, 7, 13, 22, 4
-    dll.InsertAfter(25, 7); // To insert 7 after the first occurence of 25
-    dll.printDLL(); // the output should be: 11, 2, 7, 13, 22, 4, 7
-    // Q 5
-    dll.InsertBefore(7, 26); // To insert 26 before the first occurence of 7
-    dll.printDLL(); // the output should be: 11, 2, 26, 7, 13, 22, 4, 7
-    dll.InsertBefore(19, 12); // To insert 12 before the first occurence of 19
-    dll.printDLL(); // the output should be: 12, 11, 2, 26, 7, 13, 22, 4, 7
-    // Q 6
-    dll.Delete(22);
-    dll.printDLL(); // the output should be: 12, 11, 2, 26, 7, 13, 4, 7
-    // Q 7
-    dll.Sort();
-    dll.printDLL(); // the output should be: 2, 4, 7, 7, 11, 12, 13, 26
-    // Q 8
-    if (dll.IsEmpty())
-        cout << "The list is empty" << endl;
-    // Q 9
-    cout << "Head element is: " << dll.getHead() << endl;
-    cout << "Tail element is: " << dll.getTail() << endl;
-    // Q 10
-    cout << "Number of elements in the list is: " << dll.getSize() << endl;
-    // Q 11
-    cout << "Max element is: " << dll.getMax() << endl;
-    cout << "Min element is: " << dll.getMin() << endl;
-
-    // Q 11 theory question
-    // print to the screen the written answer for the theory question
-    // Q 12 theory question
-    // print to the screen the written answer for the theory question
-    // Q 12
-    //DLLStructure dll2 (dll);
-    //dll2.printDLL(); // the output should be: 2, 4, 7, 7, 11, 12, 13, 26
-    return 0;
-}
-
 
 int main()
 {
-    tester();
+    // Q 1, 2, 3 should obviously be implemented successfully
+    // in order to run the following code
+    int array[5] = {11, 2, 7, 22, 4};
+    DLLStructure dll(array, 5); // note that 5 is the size of the array
+    dll.printDLL(); // the output should be: 11, 2, 7, 22, 4
+    // Q 4
+    dll.InsertAfter(7, 13); // To insert 13 after the first occurence of 7
+    dll.printDLL(); // the output should be: 11, 2, 7, 13, 22, 4
+    dll.InsertAfter(25, 7); // To insert 7 after the first occurence of 25
+    dll.printDLL(); // the output should be: 11, 2, 7, 13, 22, 4, 7
+    // Q 5
+    dll.InsertBefore(7, 26); // To insert 26 before the first occurence of 7
+    dll.printDLL(); // the output should be: 11, 2, 26, 7, 13, 22, 4, 7
+    dll.InsertBefore(19, 12); // To insert 12 before the first occurence of 19
+    dll.printDLL(); // the output should be: 12, 11, 2, 26, 7, 13, 22, 4, 7
+    // Q 6
+    dll.Delete(22);
+    dll.printDLL(); // the output should be: 12, 11, 2, 26, 7, 13, 4, 7
+    // Q 7
+    dll.Sort();
+    dll.printDLL(); // the output should be: 2, 4, 7, 7, 11, 12, 13, 26
+    // Q 8
+    if (dll.IsEmpty())
+        cout << "The list is empty" << endl;
+    // Q 9
+    cout << "Head element is: " << dll.getHead() << endl;
+    cout << "Tail element is: " << dll.getTail() << endl;
+    // Q 10
+    cout << "Number of elements in the list is: " << dll.getSize() << endl;
+    // Q 11
+    cout << "Max element is: " << dll.getMax() << endl;
+    cout << "Min element is: " << dll.getMin() << endl;
+
+    // Q 11 theory question
+    // print to the screen the written answer for the theory question
+    // Q 12 theory question
+    // print to the screen the written answer for the theory question
+    // Q 12
+    DLLStructure dll2 (dll);
+    dll2.printDLL(); // the output should be: 2, 4, 7, 7, 11, 12, 13, 26
     cout << "DONE" << endl;
+    return 0;
 }
