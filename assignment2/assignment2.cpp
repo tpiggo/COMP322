@@ -94,7 +94,7 @@ class DLLStructure
     public:
         DLLStructure();
         DLLStructure(int array[], int size);
-        DLLStructure(const DLLStructure &dll);
+        DLLStructure(DLLStructure &dll);
         ~DLLStructure();
         void printDLL();
         void printReverse();
@@ -147,6 +147,7 @@ void DLLStructure::mergeSort(Node arr[], int l, int r)
     mergeSort(arr, m+1, r);
     merge(arr, l, m , r);
 }
+
 void DLLStructure::merge(Node arr[], int l, int m, int r)
 {
     int c1 = m - l + 1;
@@ -233,7 +234,7 @@ DLLStructure::DLLStructure(int array[], int size)
 /**
  * Deep copy constructor
  **/ 
-DLLStructure::DLLStructure(const DLLStructure &dll)
+DLLStructure::DLLStructure(DLLStructure &dll)
 {
     this->size = dll.size;
     if (dll.first == NULL || dll.last == NULL)
@@ -324,11 +325,17 @@ void DLLStructure::InsertAfter(int valueToInsertAfter, int valueToBeInserted)
         cur = cur->getNext();
     }
     // If we got here then we clearly didn't find the element in the list. Add to the end.
-    if (!inserted)
+    if (!inserted && this->size >1)
     {
         Node *newNode = new Node(valueToBeInserted, NULL, this->last);
         this->last->setNext(newNode);
         this->last = this->last->getNext();
+    } 
+    else if (!inserted)
+    {
+        Node *aNode = new Node(valueToBeInserted);
+        this->first = aNode;
+        this->last = aNode;
     }
     // increase the size
     this->size++;
@@ -340,6 +347,17 @@ void DLLStructure::InsertAfter(int valueToInsertAfter, int valueToBeInserted)
 
 void DLLStructure::InsertBefore(int valueToInsertBefore, int valueToBeInserted)
 {
+    
+    //empty list corner case
+    if (this->size == 0)
+    {
+        Node *aNode = new Node(valueToBeInserted);
+        this->first = aNode;
+        this->last = aNode;
+        this->size++;
+        return;
+    }
+    
     bool inserted = false;
     if (this->first->getData() == valueToInsertBefore)
     {
@@ -348,7 +366,8 @@ void DLLStructure::InsertBefore(int valueToInsertBefore, int valueToBeInserted)
         this->first = newNode;
         inserted = true;
         this->size++;
-    } 
+    }
+
     else if (this->size > 1)
     {
         // Completely useless way of inserting a node.
@@ -372,12 +391,11 @@ void DLLStructure::InsertBefore(int valueToInsertBefore, int valueToBeInserted)
         this->first->setPrevious(newNode);
         this->first = newNode;
         this->size++;
+        if (valueToBeInserted > this->maxVal)
+            this->maxVal = valueToBeInserted;
+        if (valueToBeInserted < this->minVal)
+            this->minVal = valueToBeInserted;
     }
-
-    if (valueToBeInserted > this->maxVal)
-        this->maxVal = valueToBeInserted;
-    if (valueToBeInserted < this->minVal)
-        this->minVal = valueToBeInserted;
 }
 
 /**
@@ -571,6 +589,12 @@ int main()
     cout << "Head element is: " << dll.getHead() << endl;
     cout << "Tail element is: " << dll.getTail() << endl;
     // Q 10
+    // Q10 Theory!
+    cout << "==========================================================================================================================================================================" <<endl;
+    cout << "Q10: We must simply keep a counter of the size, which takes up more memory however is much more time efficient. The counter can be updated in O(1) time (increment or decrement) " << endl;
+    cout << "while looping over the list would take O(n) time every time. Thus, during insertion and deletion of elements, we must be sure to increment or decrement accordingly " << endl;
+    cout << "(being sure not to have a size which doesn't correspond to the actual size of the list.). " <<endl;
+    cout << "==========================================================================================================================================================================" <<endl;
     cout << "Number of elements in the list is: " << dll.getSize() << endl;
     // Q 11
     cout << "Max element is: " << dll.getMax() << endl;
@@ -578,11 +602,36 @@ int main()
 
     // Q 11 theory question
     // print to the screen the written answer for the theory question
+    cout << "==========================================================================================================================================================================" <<endl;
+    cout << "Q11: In order to avoid repeatedly looping over the list, we can create integer variables which can be used to hold the largest and smallest values in our" << endl;
+    cout << "list thereby when calling DLLStructure::GetMax() or DLLStructure::GetMin() we simply return those variables. This is the most speed efficient, however, during deletion" << endl;
+    cout << "and insertion, we must make sure to update these if something changes. For insertion, you must only care about if the new element is actually the largest/smallest value. " << endl;
+    cout << "and remedy this in O(1) time. However, during deletion, you may end up removing the largest/smallest variable and then you must loop through the list and find the new value O(n) time." << endl;
+    cout << "==========================================================================================================================================================================" <<endl;
     // Q 12 theory question
     // print to the screen the written answer for the theory question
+    cout << "==========================================================================================================================================================================" <<endl;
+    cout << "Q12: The default constructor is not suitable for copying when we need a deep copy, which is the case here. When we delete a shallow copy" << endl;
+    cout << "we are deleting the same object. There, when the program would end and it calls delete on dll and dll2, dll2 would seg fault as it is already" << endl;
+    cout << "free. By this I mean the DLLStructure is a new object however, the internal nodes are shared between both lists. To remedy this, we create a" << endl;
+    cout << "deep copy constructor which creates an entirely new object and entirely new nodes objects as well, therefore no long referencing any of the objects of dll. "<<endl;
+    cout << "==========================================================================================================================================================================" <<endl;
     // Q 12
     DLLStructure dll2 (dll);
     dll2.printDLL(); // the output should be: 2, 4, 7, 7, 11, 12, 13, 26
+    DLLStructure dll3; // Creating the empty list for testing purposes
+    dll3.printDLL();
+    DLLStructure dll4 (dll3);
+    dll4.InsertAfter(0, 1);
+    dll4.InsertBefore(1, 2);
+    dll4.printDLL();
+    dll4.printReverse();
+    dll4.Delete(3); // NOT IN THE LIST
+    dll4.Delete(1);
+    dll4.Delete(2);
+    dll4.Delete(3); // NOT IN THE LIST
+    dll4.printDLL();
+    cout << "Number of elements in the list is: " << dll4.getSize() << endl;
     cout << "DONE" << endl;
     return 0;
 }
