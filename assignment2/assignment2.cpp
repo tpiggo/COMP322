@@ -138,6 +138,7 @@ void DLLStructure::setMin()
 }
 
 
+// Mergesort algorithm
 void DLLStructure::mergeSort(Node arr[], int l, int r)
 {
     if (l >= r)
@@ -148,11 +149,12 @@ void DLLStructure::mergeSort(Node arr[], int l, int r)
     merge(arr, l, m , r);
 }
 
+// Merge for the merge sort algorithm
 void DLLStructure::merge(Node arr[], int l, int m, int r)
 {
     int c1 = m - l + 1;
     int c2 = r - m;
-
+    // Create 2 new arrays
     Node *leftArr = new Node[c1];
     Node *rightArr = new Node[c2];
     for (int i = 0; i < c1; i++)
@@ -162,6 +164,8 @@ void DLLStructure::merge(Node arr[], int l, int m, int r)
     
     int i = 0, j = 0, k = l;
 
+    // Crux: Take the smallest element from each list.
+    // Copy that into our original list and increment.
     while (i < c1 && j < c2)
     {
         if (leftArr[i].getData() < rightArr[j].getData())
@@ -177,7 +181,7 @@ void DLLStructure::merge(Node arr[], int l, int m, int r)
         k++;
     }
 
-
+    // Copy the remaining elements back into the array
     while (i < c1)
     {
         arr[k] = leftArr[i];
@@ -191,7 +195,7 @@ void DLLStructure::merge(Node arr[], int l, int m, int r)
         j++;
         k++;
     }
-
+    // free the memory
     delete [] leftArr;
     delete [] rightArr;
 }
@@ -205,12 +209,13 @@ DLLStructure::DLLStructure()
     this->size = 0;
 }
 
+// Constructor for array input
 DLLStructure::DLLStructure(int array[], int size)
 {
     for (int i = 0; i < size; i++)
     {
         Node *newNode = new Node(array[i], NULL, this->last);
-        // The list hasn't be initialized.
+        // First element to be inserted
         if (this->first == NULL)
         {
             this->first = newNode;
@@ -255,6 +260,7 @@ DLLStructure::DLLStructure(DLLStructure &dll)
     }
 }
 
+// Destructor
 DLLStructure::~DLLStructure()
 {
     if (this->first != NULL)
@@ -277,13 +283,18 @@ DLLStructure::~DLLStructure()
 
 void DLLStructure::printDLL()
 {
+    if (this->IsEmpty())
+    {
+        cout << "Empty list!" << endl;
+        return;
+    }
     Node *temp = this->first;
     while (temp != NULL)
     {
         cout << temp->getData();
         if (temp->getNext() != NULL)
         {
-            cout << " -> ";
+            cout << ", ";
         }
         temp = temp->getNext();
     }
@@ -292,13 +303,18 @@ void DLLStructure::printDLL()
 
 void DLLStructure::printReverse()
 {
+    if (this->IsEmpty())
+    {
+        cout << "Empty list!" << endl;
+        return;
+    }
     Node *temp = this->last;
     while (temp != NULL)
     {
         cout << temp->getData();
         if (temp->getPrevious() != NULL)
         {
-            cout << " -> ";
+            cout << ", ";
         }
         temp = temp->getPrevious();
     }
@@ -355,19 +371,28 @@ void DLLStructure::InsertBefore(int valueToInsertBefore, int valueToBeInserted)
         this->first = aNode;
         this->last = aNode;
         this->size++;
+        // the extreme values
+        this->minVal = valueToBeInserted;
+        this->maxVal = valueToBeInserted;
         return;
     }
     
+    // Non-empty list
     bool inserted = false;
     if (this->first->getData() == valueToInsertBefore)
     {
+        // First node is the value to insert ahead.
         Node *newNode = new Node(valueToBeInserted, this->first, NULL);
         this->first->setPrevious(newNode);
         this->first = newNode;
-        inserted = true;
         this->size++;
+        // Check if this is a new max or min
+        if (valueToBeInserted > this->maxVal)
+            this->maxVal = valueToBeInserted;
+        if (valueToBeInserted < this->minVal)
+            this->minVal = valueToBeInserted;
+        return;
     }
-
     else if (this->size > 1)
     {
         // Completely useless way of inserting a node.
@@ -409,6 +434,8 @@ void DLLStructure::Delete(int value)
     {
         if (cur->getData() == value)
         {
+            
+            // 1st is the case which occurs most often. Otherwise, Checking corner cases.
             if (cur != this->last && cur != this->first)
             {
                 // Most often case
@@ -430,8 +457,10 @@ void DLLStructure::Delete(int value)
                 this->first = NULL;
                 this->last = NULL;
             }
+            // delete the node, decrement size.
             delete cur;
             this->size--;
+            // fix the max and/or min values
             if (value == this->minVal)
             {
                 this->minVal = INT32_MAX;
@@ -589,17 +618,16 @@ int main()
     cout << "Head element is: " << dll.getHead() << endl;
     cout << "Tail element is: " << dll.getTail() << endl;
     // Q 10
+    cout << "Number of elements in the list is: " << dll.getSize() << endl;
+    // Q 11
+    cout << "Max element is: " << dll.getMax() << endl;
+    cout << "Min element is: " << dll.getMin() << endl;
     // Q10 Theory!
     cout << "==========================================================================================================================================================================" <<endl;
     cout << "Q10: We must simply keep a counter of the size, which takes up more memory however is much more time efficient. The counter can be updated in O(1) time (increment or decrement) " << endl;
     cout << "while looping over the list would take O(n) time every time. Thus, during insertion and deletion of elements, we must be sure to increment or decrement accordingly " << endl;
     cout << "(being sure not to have a size which doesn't correspond to the actual size of the list.). " <<endl;
     cout << "==========================================================================================================================================================================" <<endl;
-    cout << "Number of elements in the list is: " << dll.getSize() << endl;
-    // Q 11
-    cout << "Max element is: " << dll.getMax() << endl;
-    cout << "Min element is: " << dll.getMin() << endl;
-
     // Q 11 theory question
     // print to the screen the written answer for the theory question
     cout << "==========================================================================================================================================================================" <<endl;
