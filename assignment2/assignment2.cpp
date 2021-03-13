@@ -27,6 +27,7 @@ Node::Node()
 {
     // Do nothing
 }
+
 /**
  * Constructor 
  * 
@@ -107,6 +108,7 @@ class DLLStructure
         int getSize();
         int getMax();
         int getMin();
+
 };
 
 /**
@@ -254,24 +256,22 @@ DLLStructure::DLLStructure(const DLLStructure &dll)
 
 DLLStructure::~DLLStructure()
 {
-    if (this->first == NULL)
+    if (this->first != NULL)
     {
-        // Nothing to do in this case
-        return;
+        // Destruct the list
+        while (this->first->getNext() != NULL)
+        {
+            Node *temp = this->first; 
+            this->first = this->first->getNext();
+            this->first->setPrevious(NULL);
+            delete temp;
+        }
+        // There is only one node left!
+        Node *temp = this->first;
+        this->first = NULL;
+        this->last = NULL;
+        delete temp;   
     }
-    // Destruct the list
-    while (this->first->getNext() != NULL)
-    {
-        Node *temp = this->first; 
-        this->first = this->first->getNext();
-        this->first->setPrevious(NULL);
-        delete temp;
-    }
-    // There is only one node left!
-    Node *temp = this->first;
-    this->first = NULL;
-    this->last = NULL;
-    delete temp;
 }
 
 void DLLStructure::printDLL()
