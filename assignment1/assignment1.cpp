@@ -4,6 +4,13 @@
 #include <time.h>
 using namespace std;
 
+
+/**
+ * Name: Timothy Piggott
+ * ID: 260855765
+ * 
+ * */
+
 void checkPassword()
 {
 	string var;
@@ -13,12 +20,12 @@ void checkPassword()
 	cin >> var;
 	if (var.length() < 8) 
 	{
-		cout << "Error! Password not long enough (min 8 characters)!" << endl;
+		cout << "Error! Password not long enough (min 8 characters)!\n\n" << endl;
 		// Return out of the function
 		return;
 	}
 	// Mapping of the elements in the password
-	map<char, int> charMap;
+	map<char, int> charMap = map<char, int>();
 	bool hasNum = false;
 	bool hasSpecial = false;
 	// Want to make an array of tuples???? IDK how
@@ -36,22 +43,22 @@ void checkPassword()
 		// more than 2, error!
 		if (charMap[var[i]] > 2)
 		{
-			cout << "Error! Repeated character " << var[i] << " too many times" << endl;
+			cout << "Error! Repeated character " << var[i] << " too many times!\n\n" << endl;
 			return;
 		}
 	}
 	if (!hasNum)
 	{
-		cout << "Error! Missing a number in the password!" << endl;
+		cout << "Error! Missing a number in the password!\n\n" << endl;
 		// Return out of the function
 		return;
 	}
 	else if (!hasSpecial)
 	{
-		cout << "Error! Missing a special character *, #, $ in the password!" << endl;
+		cout << "Error! Missing a special character *, #, $ in the password!\n\n" << endl;
 		return;
 	}
-	cout << "Password has been accepted!" << endl;
+	cout << "Password has been accepted!\n\n" << endl;
 }
 void convertPhonetic()
 {
@@ -67,13 +74,13 @@ void convertPhonetic()
 	string phoneticString;
 	for (size_t i = 0; i < var.length(); i++)
 	{
+		// Error checking characters 1 by 1
 		if (var[i] < 'A' || (var[i] < 'a' && var[i] > 'Z') || var[i] > 'z')
 		{
-			cout << "Error! Bad character. Ending!";
+			cout << "Error! Bad character. Ending!\n\n" << endl;
 			return;
 		}
-		int ascii;
-		ascii = (var[i] >= 'A' && var[i] < 'Z')? var[i] - 65: var[i] - 97;
+		int ascii = (var[i] >= 'A' && var[i] < 'Z')? var[i] - 65: var[i] - 97;
 		// append a space if not the first word
 		if (i != 0)
 		{
@@ -82,7 +89,7 @@ void convertPhonetic()
 		// append the phonetic replacement
 		phoneticString.append(phonetics[ascii]);
 	}
-	cout << phoneticString << "\n" << endl;
+	cout << phoneticString << "\n\n\n" << endl;
 }
 
 const int rows = 5;
@@ -95,8 +102,11 @@ int a = 1;
 */
 void fillMatrix(int matrix[rows][cols]) 
 {
+	// add a simple static increment.
 	a++;
+	// seed the random num generator.
 	srand(time(NULL) + a);
+	// Create the matrix
 	for (int i = 0; i < rows; i++)
 	{
 		for (int j = 0; j < cols; j++)
@@ -126,7 +136,7 @@ void printMatrix(int matrix[rows][cols])
 		cout << endl;
 		cout << "------------------------------" << endl;
 	}
-	cout << "\n\n";
+	cout << "\n\n" << endl;
 }
 
 void multiplyMatrices(int matrix_left[rows][cols],
@@ -143,8 +153,10 @@ void multiplyMatrices(int matrix_left[rows][cols],
 	}
 	if (j < cols)
 	{
+		// Checking if we have reached the end of the column, don't multiple
 		if (k < cols)
 		{
+			// Do the matrix multiplication for the [i,j]th cell. 
 			if (k == 0)
 			{
 				matrix_result[i][j] = matrix_left[i][k] * matrix_right[k][j];
@@ -154,6 +166,7 @@ void multiplyMatrices(int matrix_left[rows][cols],
 				matrix_result[i][j] += matrix_left[i][k] * matrix_right[k][j];
 			}
 			k++;
+			// recursive call
 			return multiplyMatrices(matrix_left, matrix_right, matrix_result);
 		}
 		else
@@ -182,12 +195,13 @@ void multiplyMatricesIterative(int matrix_left[rows][cols],
 	{
 		for (int j = 0; j < cols; j++)
 		{
-			int sum = 0;
+			// Set the [i,j]th cell to zero
+			matrix_result[i][j] = 0;
 			for (int k = 0; k < rows; k++)
 			{
-				sum += matrix_left[i][k] * matrix_right[k][j];
+				// Put the sum into the [i,j]th cell
+				matrix_result[i][j]  += matrix_left[i][k] * matrix_right[k][j];
 			}
-			matrix_result[i][j] = sum;
 		}
 	}
 }
@@ -195,6 +209,7 @@ void multiplyMatricesIterative(int matrix_left[rows][cols],
 
 int main()
 {
+	// Standard testing functions given by prof.
 	checkPassword();
 	convertPhonetic();
 	int matrix[rows][cols];
