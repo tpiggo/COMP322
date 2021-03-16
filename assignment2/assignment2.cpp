@@ -348,7 +348,7 @@ void DLLStructure::InsertAfter(int valueToInsertAfter, int valueToBeInserted)
         cur = cur->getNext();
     }
     // If we got here then we clearly didn't find the element in the list. Add to the end.
-    if (!inserted && this->size >1)
+    if (!inserted && this->size > 1)
     {
         Node *newNode = new Node(valueToBeInserted, NULL, this->last);
         this->last->setNext(newNode);
