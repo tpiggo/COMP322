@@ -397,6 +397,7 @@ void intListTest()
 
 void stringTest()
 {
+    // Issues HERE. Fix later
     string array[] = {"string1", "String2", "long String"};
     List<string> dll (array, 3);
     dll.printDLL();
