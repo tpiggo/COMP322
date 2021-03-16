@@ -2,6 +2,34 @@
 #include <string>
 using namespace std;
 
+/**
+ * Basic Comparison types.
+ */
+template<typename T>
+struct comparison
+{
+    using type = less<T>;
+};
+
+template <>
+struct comparison<string>
+{
+    using type = struct string_comp
+    {
+        bool operator() (const string a, const string b) const 
+        {
+            return a.compare(b);
+        }
+    };
+};
+
+template<typename T>
+using compare = typename comparison<T>::type;
+
+/**
+ * List class
+ * 
+ */ 
 template<typename T>
 class List
 {
@@ -33,13 +61,16 @@ class List
         };
         Node *head = NULL;
         Node *tail = NULL;
-        int minVal = INT32_MAX, maxVal = INT32_MIN, size;
+        // NEED TO SET THESE!
+        T minVal, maxVal;
+        int size;
+        compare<T> comparator;
         void setMin()
         {
             Node *cur = this->head;
             while (cur != NULL)
             {
-                if (cur->data < this->minVal)
+                if (comparator(this->minVal, cur->data))
                     minVal = cur->data;
             }
         }
@@ -48,7 +79,7 @@ class List
             Node *cur = this->head;
             while (cur != NULL)
             {
-                if (cur->data > this->maxVal)
+                if (comparator(cur->data, this->maxVal))
                     maxVal = cur->data;
             }
         }
@@ -124,9 +155,9 @@ List<T>::List(T array[], int size)
             this->tail->next = newNode;
         }
         // set and get the min value
-        if (this->minVal > array[i])
+        if (comparator(this->minVal, array[i]))
             this->minVal = array[i];
-        if (this->maxVal < array[i])
+        if (comparator(array[i], this->maxVal))
             this->maxVal = array[i];
         this->tail = newNode;
     }
@@ -253,9 +284,9 @@ void List<T>::InsertAfter(T valueToInsertAfter, T valueToBeInserted)
     }
     // increase the size
     this->size++;
-    if (valueToBeInserted > this->maxVal)
+    if (comparator(this->maxVal, valueToBeInserted))
         this->maxVal = valueToBeInserted;
-    if (valueToBeInserted < this->minVal)
+    if (comparator(valueToBeInserted, this->minVal))
         this->minVal = valueToBeInserted;
 }
 
@@ -285,9 +316,9 @@ void List<T>::InsertBefore(T valueToInsertBefore, T valueToBeInserted)
         this->head = newNode;
         this->size++;
         // Check if this is a new max or min
-        if (valueToBeInserted > this->maxVal)
+        if (comparator(this->maxVal, valueToBeInserted))
             this->maxVal = valueToBeInserted;
-        if (valueToBeInserted < this->minVal)
+        if (comparator(valueToBeInserted, this->minVal))
             this->minVal = valueToBeInserted;
         return;
     }
@@ -314,9 +345,9 @@ void List<T>::InsertBefore(T valueToInsertBefore, T valueToBeInserted)
         this->head->previous = newNode;
         this->head = newNode;
         this->size++;
-        if (valueToBeInserted > this->maxVal)
+        if (comparator(this->maxVal, valueToBeInserted))
             this->maxVal = valueToBeInserted;
-        if (valueToBeInserted < this->minVal)
+        if (comparator(valueToBeInserted, this->minVal))
             this->minVal = valueToBeInserted;
     }
 }
@@ -397,7 +428,6 @@ void intListTest()
 
 void stringTest()
 {
-    // Issues HERE. Fix later
     string array[] = {"string1", "String2", "long String"};
     List<string> dll (array, 3);
     dll.printDLL();
