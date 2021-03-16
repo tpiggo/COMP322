@@ -4,6 +4,13 @@
 #include <time.h>
 using namespace std;
 
+/**
+ * Name: Timothy Piggott
+ * Date: March 13th 2021
+ * Student ID: 260855765
+ * 
+ **/ 
+
 class Node
 {
     private:
