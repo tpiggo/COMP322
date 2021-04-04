@@ -160,23 +160,15 @@ class Deck
         {
             auto seed = chrono::system_clock::now().time_since_epoch().count();
             generator = std::default_random_engine{seed};
-            cout << "making pualy happy" << endl;
         }
-        // Singleton but not working as expected.
-        // static Deck& getInstance()
-        // {
-        //     static Deck _instance;
-        //     return _instance; 
-        // }
 
         ~Deck()
         {
-            while (!aDeck.empty())
+            for (Card *c: aDeck)
             {
-                vector<Card *>::iterator it = aDeck.begin();
-                aDeck.erase(it);
-                delete *it;
+                delete c;
             }
+            aDeck.clear();
         }
 
         void printDeck()
@@ -249,16 +241,17 @@ class HumanPlayer: public AbstractPlayer
             char answer = 'y';
             cout << "Do you want to draw? (y/n):";
             cin >> answer;
-            cout << endl;
-            return this->answer == 'y';
+            return answer == 'y';
         }
         void announce()
         {
+            cout << "Player: ";
             aHand.printHand();
         }
+
         Hand& getHand()
         {
-            return this->aHand;
+            return aHand;
         }
     private:
         char answer = 'y';
@@ -268,19 +261,26 @@ class ComputerPlayer: public AbstractPlayer
 {
     public:
         bool isDrawing() const
-        {  
-            if(getHand().getTotal() > 16)
+        {
+            if(constHand().getTotal() <= 16)
             {
                 return true;
             }
             return false;
         }
+
         void announce()
         {
+            cout << "Casino: "; 
             aHand.printHand();
         }
+
+        Hand& getHand()
+        {
+            return aHand;
+        }
     private:
-        Hand getHand() const
+        Hand constHand() const
         {
             return aHand;
         }
@@ -289,19 +289,84 @@ class ComputerPlayer: public AbstractPlayer
 class BlackJackGame
 {
     public:
+        BlackJackGame()
+        {
+            aDeck.populate();
+        }
+
         void play();
     private:
         Deck aDeck;
         HumanPlayer human;
-        ComputerPlayer computer;
+        ComputerPlayer m_casino;
 };
 
 void BlackJackGame::play()
 {
+    aDeck.shuffle();
+    // Deal a card to the casino
+    aDeck.deal(m_casino.getHand());
+    // Deal 2 cards to the player
+    aDeck.deal(human.getHand());
+    aDeck.deal(human.getHand());
+    m_casino.announce();
+    human.announce();
+    bool done[2] = {false, false};
+    while (!done[0] || !done[1])
+    {
+        if (!done[0] && human.isDrawing())
+        {
+            aDeck.deal(human.getHand());
+            human.announce();
+            if (human.isBusted())
+            {
+                cout << "Casino wins! Player loses!" << endl;
+                break;
+            }
+        }
+        else if (!done[0])
+        {
+            done[0] = true;
+        }
 
+        // Next is the casinos turn.
+        if (!done[1] && m_casino.isDrawing())
+        {
+            aDeck.deal(m_casino.getHand());
+            m_casino.announce();
+            if (m_casino.isBusted())
+            {
+                cout << "Player wins! Casino loses!" << endl;
+                break;
+            }
+        }
+        else if (!done[1])
+        {
+            done[1] = true;
+        }
+    }
+
+    if (!m_casino.isBusted() && !human.isBusted())
+    {
+        if (m_casino.getHand().getTotal() > human.getHand().getTotal())
+        {
+            cout << "Casino wins!" << endl;
+        } 
+        else if (m_casino.getHand().getTotal() < human.getHand().getTotal()) 
+        {
+            cout << "Player wins!" << endl;
+        } 
+        else
+        {
+            cout << "Push: it was a draw" << endl;
+        }
+    }
+    // Otherwise done! Clear the hands
+    m_casino.getHand().clear();
+    human.getHand().clear();
 }
 
-int myTest()
+int main()
 {
     cout << "\tWelcome to the Comp322 Blackjack game!" << endl << endl;
     BlackJackGame game;
@@ -317,31 +382,6 @@ int myTest()
         cout << endl << endl;
         playAgain = (answer == 'y' ? true : false);
     }
-    cout <<"Gave over!";
-    return 0;
-}
-
-int tester()
-{
-    Deck aDeck;
-    aDeck.populate();
-    aDeck.printDeck();
-    aDeck.shuffle();
-    aDeck.printDeck();
-    cout << endl;
-    HumanPlayer h;
-    if (h.isDrawing())
-    {
-        aDeck.deal(h.getHand());
-        h.announce();
-    }
-
-    return 0;
-}
-
-int main()
-{
-    tester();
-    cout << "Done!" << endl;
+    cout <<"Game over!";
     return 0;
 }
