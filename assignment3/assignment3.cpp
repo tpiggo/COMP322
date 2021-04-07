@@ -26,13 +26,6 @@ class Card
             this->type = t;
         };
 
-        // Converting types in this constructor.
-        Card(int r, int t)
-        {
-            this->rank = static_cast<Rank>(r);
-            this->type = static_cast<Type>(t);
-        }
-
         int getValue(bool isOne)
         {
             switch(rank)
@@ -135,19 +128,23 @@ int Hand::getTotal()
 {
     int tot = 0;
     bool hasAce = false;
-    for (Card *aCard: hand)
+    int firstAcePos = -1;
+    for (int i = 0; i < hand.size(); i++)
     {
-        tot += aCard->getValue(hasAce);
-        if (!hasAce && aCard->getValue(hasAce) == 11)
+        if (firstAcePos < 0 && hand.at(i)->getValue(false) == 11)
         {
-            hasAce = true;
+            firstAcePos = i;
+        }
+        else 
+        {
+            tot += hand.at(i)->getValue(firstAcePos < 0);
         }
     }
 
     // Enforcing the rules here.
-    if (tot > 21 && hasAce)
+    if (tot + 11 > 21 && firstAcePos >= 0)
     {
-        tot -= 10;
+        tot += hand.at(firstAcePos)->getValue(true);
     }
 
     return tot;
@@ -193,7 +190,7 @@ class Deck
             {
                 for (int j = 1; j < 14; j++)
                 {
-                    Card *aCard = new Card(j, i);
+                    Card *aCard = new Card((Rank)j, (Type)i);
                     aDeck.push_back(aCard);
                 }
             }
@@ -233,30 +230,6 @@ class AbstractPlayer
         Hand aHand;
 };
 
-class HumanPlayer: public AbstractPlayer
-{
-    public:
-        bool isDrawing() const
-        {
-            char answer = 'y';
-            cout << "Do you want to draw? (y/n):";
-            cin >> answer;
-            return answer == 'y';
-        }
-        void announce()
-        {
-            cout << "Player: ";
-            aHand.printHand();
-        }
-
-        Hand& getHand()
-        {
-            return aHand;
-        }
-    private:
-        char answer = 'y';
-};
-
 class ComputerPlayer: public AbstractPlayer
 {
     public:
@@ -268,8 +241,8 @@ class ComputerPlayer: public AbstractPlayer
             }
             return false;
         }
-
-        void announce()
+        
+        void handInfo()
         {
             cout << "Casino: "; 
             aHand.printHand();
@@ -284,6 +257,54 @@ class ComputerPlayer: public AbstractPlayer
         {
             return aHand;
         }
+};
+
+class HumanPlayer: public AbstractPlayer
+{
+    public:
+        bool isDrawing() const
+        {
+            char answer = 'y';
+            cout << "Do you want to draw? (y/n):";
+            cin >> answer;
+            return answer == 'y';
+        }
+        void announce(ComputerPlayer casino)
+        {
+            if (casino.isBusted() && !this->isBusted())
+                cout << "Player wins!" << endl;
+            else if (!casino.isBusted() && this->isBusted())
+                cout << "Casino wins!" << endl;
+            else 
+            {
+                if (casino.getHand().getTotal() > this->getHand().getTotal())
+                {
+                    cout << "Casino wins!" << endl;
+                } 
+                else if (casino.getHand().getTotal() < this->getHand().getTotal()) 
+                {
+                    cout << "Player wins!" << endl;
+                } 
+                else
+                {
+                    cout << "Push: it was a draw" << endl;
+                }
+            }
+
+        }
+
+        void handInfo()
+        {
+            cout << "Player: "; 
+            aHand.printHand();
+        }
+
+        Hand& getHand()
+        {
+            return aHand;
+        }
+    private:
+        char answer = 'y';
 };
 
 class BlackJackGame
@@ -309,18 +330,17 @@ void BlackJackGame::play()
     // Deal 2 cards to the player
     aDeck.deal(human.getHand());
     aDeck.deal(human.getHand());
-    m_casino.announce();
-    human.announce();
+    m_casino.handInfo();
+    human.handInfo();
     bool done[2] = {false, false};
     while (!done[0] || !done[1])
     {
         if (!done[0] && human.isDrawing())
         {
             aDeck.deal(human.getHand());
-            human.announce();
+            human.handInfo();
             if (human.isBusted())
             {
-                cout << "Casino wins! Player loses!" << endl;
                 break;
             }
         }
@@ -333,10 +353,9 @@ void BlackJackGame::play()
         if (!done[1] && m_casino.isDrawing())
         {
             aDeck.deal(m_casino.getHand());
-            m_casino.announce();
+            m_casino.handInfo();
             if (m_casino.isBusted())
             {
-                cout << "Player wins! Casino loses!" << endl;
                 break;
             }
         }
@@ -346,21 +365,7 @@ void BlackJackGame::play()
         }
     }
 
-    if (!m_casino.isBusted() && !human.isBusted())
-    {
-        if (m_casino.getHand().getTotal() > human.getHand().getTotal())
-        {
-            cout << "Casino wins!" << endl;
-        } 
-        else if (m_casino.getHand().getTotal() < human.getHand().getTotal()) 
-        {
-            cout << "Player wins!" << endl;
-        } 
-        else
-        {
-            cout << "Push: it was a draw" << endl;
-        }
-    }
+    human.announce(m_casino);
     // Otherwise done! Clear the hands
     m_casino.getHand().clear();
     human.getHand().clear();
