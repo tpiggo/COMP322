@@ -145,6 +145,10 @@ int Hand::getTotal()
     if (tot + 11 > 21 && firstAcePos >= 0)
     {
         tot += hand.at(firstAcePos)->getValue(true);
+    } 
+    else 
+    {
+        tot += hand.at(firstAcePos)->getValue(false);
     }
 
     return tot;
