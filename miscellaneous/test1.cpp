@@ -66,10 +66,133 @@ void createArray(void){
     delete [] arr2;
 }
 
+template <typename T>
+class SmartAllocator
+{
+    public:
+        SmartAllocator()
+        {
+            cout << "ERROR: too few arguments" <<endl;
+        }
+
+        SmartAllocator(int inputSize)
+        {
+            this->allocated  = allocateMemory(inputSize);
+        }
+
+        ~SmartAllocator()
+        {
+            delete [] this->allocated;
+            this->allocated = NULL;
+        }
+
+        T* getAddress()
+        {
+            return allocated;
+        }
+    private:
+        T* allocated = NULL;
+        T* allocateMemory(int inputSize)
+        {  
+            if (inputSize < 1)
+            {
+                cout << "ERROR: too few arguments" <<endl;
+                return NULL;
+            }
+            return new T[inputSize]; 
+        }
+};
+
+class MyUtility
+{
+    public:
+        MyUtility(char* arr)
+        {
+            this->utility = arr;
+            int i = 0;
+            char *read = arr;
+            while (*read != NULL)
+            {
+                read++;
+                i++;
+            }
+            this->size = i;
+        }
+
+        void arrayCopy(char *toCopy)
+        {
+            int i = 0;
+            char *read = toCopy;
+            while (*read != NULL)
+            {
+                read++;
+                i++;
+            }
+            char *temp = this->utility;
+            int newSize = this->size + i;
+            this->utility = new char[this->size + i];
+            
+            for (int j = 0;j < this->size; j++)
+            {
+                this->utility[j] = temp[j];
+            }
+
+            for (int j = 0; j < i; j++)
+            {
+                this->utility[j+this->size] = toCopy[j];
+            }
+            this->size = newSize;
+            toCopy = this->utility;
+        }
+
+        int getLength()
+        {
+            return this->size;
+        }
+
+        char *concatenate(char *toCopy)
+        {
+            int i = 0;
+            char *read = toCopy;
+            while (*read != NULL)
+            {
+                read++;
+                i++;
+            }
+            char *temp = this->utility;
+            int newSize = this->size + i;
+            this->utility = new char[this->size + i];
+            
+            for (int j = 0;j < this->size; j++)
+            {
+                this->utility[j] = temp[j];
+            }
+
+            for (int j = 0; j < i; j++)
+            {
+                this->utility[j+this->size] = toCopy[j];
+            }
+            this->size = newSize;
+            return this->utility;
+        }
+    private:
+        char *utility;
+        int size = 0;
+};
+
 int main(){
-    //printf("Func returns: %d\n", funcAdd(5));
-    printf("Func returns: %d\n", funcAdd2(5));
-    printf("Length of string: %d\n", getLength("String"));
-    createArray();
+    char a[] = "Hello World";
+    MyUtility u2(a);
+    MyUtility u(a);
+    MyUtility u3(a);
+
+    //cout << "Length: " << u.getLength() << endl;
+    char a2[] = "Good bye";
+    u.arrayCopy(a2);
+    cout << a2 << endl;
+    cout << u2.concatenate(a2) << endl;
+    // cout << u.concatenate(a2) << endl;
+    // cout << "Length: " << u.getLength();
+    cout << "Everything good!" <<endl;
     return 0;
 }

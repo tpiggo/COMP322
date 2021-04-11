@@ -26,8 +26,14 @@ class Card
             this->type = t;
         };
 
+
+        /**
+         * Get the card value based on the rules
+         * Takes in a bool for the value of the ace.
+         */ 
         int getValue(bool isOne)
         {
+            
             switch(rank)
             {
                 case JACK:
@@ -47,6 +53,9 @@ class Card
             }
         };
 
+        /**
+         * Print out the card in the way specified.
+         */ 
         void displayCard()
         {
             string aString = "";
@@ -80,6 +89,7 @@ class Card
                     aString.append("S");
                     break;
             }
+            // Print the string.
             cout << aString;
         };
 
@@ -93,16 +103,17 @@ class Hand
     public:
         Hand(){};
 
+        // Empty the hand before destroying.
         ~Hand()
         {
             this->hand.clear();
         };
-
+        // Add a card to a hand.
         void add(Card *pCard)
         {
             this->hand.push_back(pCard);
         };
-        
+        // Clear a hand.
         void clear()
         {
             this->hand.clear();
@@ -110,6 +121,7 @@ class Hand
 
         int getTotal();
 
+        // Utility function for printing a card.
         void printHand()
         {
             for (Card *aCard: hand)
@@ -159,12 +171,14 @@ class Deck
     public:
         Deck()
         {
+            // Create and set the generator.
             auto seed = chrono::system_clock::now().time_since_epoch().count();
             generator = std::default_random_engine{seed};
         }
 
         ~Deck()
         {
+            // Destroy the deck.
             for (Card *c: aDeck)
             {
                 delete c;
@@ -172,24 +186,9 @@ class Deck
             aDeck.clear();
         }
 
-        void printDeck()
-        {
-            int i = 0;
-            for (Card *aCard: aDeck)
-            {
-                aCard->displayCard();
-                if (aCard != aDeck.back())
-                {
-                    cout << ", ";
-                }
-                i++;
-            }
-            cout << endl;
-            cout << "Size is " << aDeck.size() << endl;    
-        }
-
         void populate()
         {
+            // Populate the deck
             for (int i  = 0; i < 4; i++)
             {
                 for (int j = 1; j < 14; j++)
@@ -202,6 +201,7 @@ class Deck
 
         void shuffle()
         {
+            // Shuffle the deck using the built in shuffling and use a generator.
             std::shuffle(aDeck.begin(), aDeck.end(), generator);
         }
 
@@ -239,6 +239,7 @@ class ComputerPlayer: public AbstractPlayer
     public:
         bool isDrawing() const
         {
+            // Check the const hand.
             if(constHand().getTotal() <= 16)
             {
                 return true;
@@ -257,6 +258,8 @@ class ComputerPlayer: public AbstractPlayer
             return aHand;
         }
     private:
+        // Need to get back the protected hand however, since isDrawing is const, we
+        // cannot allow it to modify the hand.
         Hand constHand() const
         {
             return aHand;
@@ -268,19 +271,23 @@ class HumanPlayer: public AbstractPlayer
     public:
         bool isDrawing() const
         {
+            // Get the players answer from STD in
             char answer = 'y';
             cout << "Do you want to draw? (y/n):";
             cin >> answer;
             return answer == 'y';
         }
+        // Announce the winner through the player.
         void announce(ComputerPlayer casino)
         {
+            // Check if someone has bust but not the other.
             if (casino.isBusted() && !this->isBusted())
                 cout << "Player wins!" << endl;
             else if (!casino.isBusted() && this->isBusted())
                 cout << "Casino wins!" << endl;
             else 
             {
+                // No one has bust, now check who the winner is or if it was a push.
                 if (casino.getHand().getTotal() > this->getHand().getTotal())
                 {
                     cout << "Casino wins!" << endl;
@@ -297,12 +304,14 @@ class HumanPlayer: public AbstractPlayer
 
         }
 
+        // Print out the card info.
         void handInfo()
         {
             cout << "Player: "; 
             aHand.printHand();
         }
 
+        // Get back the reference to the hand
         Hand& getHand()
         {
             return aHand;
@@ -316,6 +325,7 @@ class BlackJackGame
     public:
         BlackJackGame()
         {
+            // Populate the deck
             aDeck.populate();
         }
 
